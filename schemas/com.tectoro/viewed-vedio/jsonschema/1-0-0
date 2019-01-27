@@ -1,0 +1,30 @@
+{
+	"$schema": "http://privateiglu:7000/schemas/com.tectoro.self-desc/schema/jsonschema/1-0-0#",
+	"self": {
+		"vendor": "com.tectoro",
+		"name": "viewed-vedio",
+		"format": "jsonschema",
+		"version": "1-0-0"
+	},
+
+	"type": "object",
+	"properties": {
+		"action": {
+			"type": "string"
+		},
+		"vedioId": {
+			"type": "string"
+    },
+    "viewedTime": {
+      "type": "string"
+    },
+    "totalTime": {
+      "type": "string"
+    },
+		"seeked": {
+			"type": "string"
+		}
+	},
+	"required": ["action", "vedioId", "viewedTime", "totalTime","seeked"],
+	"additionalProperties": false
+}

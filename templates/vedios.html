@@ -1,0 +1,127 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="text/javascript" async=1>
+    ;(function(p,l,o,w,i,n,g){if(!p[i]){p.GlobalSnowplowNamespace=p.GlobalSnowplowNamespace||[];
+    p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
+    };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
+    n.src=w;g.parentNode.insertBefore(n,g)}}(window,document,"script","/js/snowplow.js","snowplow_name_here"));
+</script>
+<style>
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto;
+  background-color: white;
+  /* border:1px solid black; */
+  padding: 10px;
+}
+.navBar {
+    margin-bottom: 16px;
+    margin-top: 16px;
+    text-align:center;
+}
+
+.disBar {
+    margin-bottom: 16px;
+    margin-top: 16px;
+    text-align:center;
+}
+.ctlBar {
+    margin-bottom: 16px;
+    margin-top: 16px;
+    text-align:center;
+}
+.vid {
+    border: none;
+    margin-bottom: 16px;
+    margin-top: 16px;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+    border-radius: 12px;
+    background-color: #4CAF50;
+    color: white;
+}
+.ctl {
+    border: none;
+    margin-bottom: 0 0 0 0;
+    margin-top: 16px;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+    border-radius: 12px;
+    background-color: #2196F3;
+    color: white;
+}
+.btn:active {
+    background-color: grey;
+}
+</style>
+</head>
+<body>
+<div class="grid-container">
+        <div class="navBar">
+                <button class="btn vid active" onclick="changeVid('https://www.w3schools.com/tags/movie.mp4')" type="button">Video1</button><br>
+                <button class="btn vid" onclick="changeVid('https://www.w3schools.com/tags/mov_bbb.mp4')" type="button">Video2</button><br>
+                <button class="btn vid" onclick="changeVid('https://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_10mb.mp4')" type="button">Video3</button><br>
+            </div>
+            <div class="disBar"> 
+                <video id="myVideo" width="700" height="500" onseeked="onSeeking('{{user}}')" onplaying="onPlaying('{{user}}')" onplay="onPlay('{{user}}')" controls>
+                    <source src="https://www.w3schools.com/tags/movie.mp4" type="video/mp4">
+                </video>
+            </div>
+</div>
+
+<script>
+snowplow_name_here("newTracker", "cf", "localhost:9000", {appId: "vedio-app"});
+
+function changeVid(vidPath) { 
+    document.getElementById("myVideo").src = vidPath;
+    document.getElementById("myVideo").load(); 
+}
+
+function onSeeking(usr_id) {
+    snowplow_name_here('setUserId', usr_id);
+    snowplow_name_here('trackSelfDescribingEvent', {
+    schema: 'iglu:com.tectoro/viewed-vedio/jsonschema/1-0-0',
+    data: {
+        action: 'seeked', seeked: 'true',
+        vedioId: document.getElementById("myVideo").currentSrc,
+        viewedTime: document.getElementById("myVideo").played.end(0).toString(),
+        totalTime: document.getElementById("myVideo").duration.toString()
+    }});
+}
+
+function onPlaying(usr_id) {
+    snowplow_name_here('setUserId', usr_id);
+    snowplow_name_here('trackSelfDescribingEvent', {
+    schema: 'iglu:com.tectoro/viewed-vedio/jsonschema/1-0-0',
+    data: {
+        action: 'played-after-pause', seeked: 'false',
+        vedioId: document.getElementById("myVideo").currentSrc,
+        viewedTime: document.getElementById("myVideo").played.end(0).toString(),
+        totalTime: document.getElementById("myVideo").duration.toString(),
+    }});
+}
+
+function onPlay(usr_id) {
+    var num = 0.0;
+    if (document.getElementById("myVideo").currentTime == 0) {
+        snowplow_name_here('setUserId', usr_id);
+        snowplow_name_here('trackSelfDescribingEvent', {
+        schema: 'iglu:com.tectoro/viewed-vedio/jsonschema/1-0-0',
+        data: {
+            action: 'started', seeked: 'true',
+            vedioId: document.getElementById("myVideo").currentSrc,
+            viewedTime: num.toString(),
+            totalTime: document.getElementById("myVideo").duration.toString()
+        }});
+    }
+} 
+</script>
+</body> 
+</html>

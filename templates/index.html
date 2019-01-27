@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+      <head>
+         <script type="text/javascript" async=1>
+            ;(function(p,l,o,w,i,n,g){if(!p[i]){p.GlobalSnowplowNamespace=p.GlobalSnowplowNamespace||[];
+            p.GlobalSnowplowNamespace.push(i);p[i]=function(){(p[i].q=p[i].q||[]).push(arguments)
+            };p[i].q=p[i].q||[];n=l.createElement(o);g=l.getElementsByTagName(o)[0];n.async=1;
+            n.src=w;g.parentNode.insertBefore(n,g)}}(window,document,"script","http://d1fc8wv8zag5ca.cloudfront.net/2.10.0/sp.js","snowplow_name_here"));
+
+            var trac = snowplow_name_here("newTracker", "cf", "localhost:9000", {platform: "mob", cookieLifetime: 86400 * 2});
+         </script>
+         <meta name="viewport" content="width=device-width, initial-scale=1">
+         <style>
+         body {
+            text-align:center;
+         }
+         .btn {
+            border: none;
+            margin-bottom: 16px;
+            margin-top: 16px;
+            padding: 14px 28px;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-block;
+            border-radius: 12px;
+         }
+         .btn:active {
+            transform: translateY(4px);
+         }
+         .success {
+            background-color: #4CAF50;
+            color: white;
+         }
+         .info {
+            background: #2196F3;
+            color: white;
+         }
+         .warning {
+            background: #ff9800;
+            color: white;
+         }
+         .danger {
+            background: #f44336;
+            color: white;
+         }
+         </style>
+      </head>
+   <body>
+      <form action="{{ url_for('track', msg='success message') }}">
+         <input class="btn success" type="submit" value="Success" />
+      </form></br>
+      <form action="{{ url_for('track', msg='info message') }}">
+         <input class="btn info" type="submit" value="Info" />
+      </form></br>
+      <form action="{{ url_for('track', msg='warning message') }}">
+         <input class="btn warning" type="submit" value="Warning" />
+      </form></br>
+      <form action="{{ url_for('track', msg='danger message') }}">
+         <input class="btn danger" type="submit" value="Danger" />
+      </form></br>
+   </body>
+</html>
