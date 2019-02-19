@@ -1,0 +1,49 @@
+## starting zookeeper
+docker run -d --name zookeeper --network snowplow -p 2181:2181 zookeeper:3.4
+
+## starting kafka service
+docker run -d --name kafka --network snowplow -p 9092:9092 -p 7203:7203 \
+-e KAFKA_BROKER_ID=0 \
+-e KAFKA_PORT=9092 \
+-e KAFKA_ADVERTISED_PORT=9092 \
+-e KAFKA_DEFAULT_REPLICATION_FACTOR=1 \
+-e KAFKA_NUM_PARTITIONS=1 \
+-e KAFKA_AUTO_CREATE_TOPICS_ENABLE=true \
+-e KAFKA_LOG_RETENTION_HOURS=1 \
+-e ZOOKEEPER_PORT=2181 \
+--env ZOOKEEPER_IP=zookeeper \
+ches/kafka
+
+## Creating the topics
+docker run --rm --network snowplow ches/kafka kafka-topics.sh --create --topic good_raw --replication-factor 1 --partitions 1 --zookeeper zookeeper:2181
+docker run --rm --network snowplow ches/kafka kafka-topics.sh --create --topic bad_raw --replication-factor 1 --partitions 1 --zookeeper zookeeper:2181
+docker run --rm --network snowplow ches/kafka kafka-topics.sh --create --topic good_enrich --replication-factor 1 --partitions 1 --zookeeper zookeeper:2181
+docker run --rm --network snowplow ches/kafka kafka-topics.sh --create --topic bad_enrich --replication-factor 1 --partitions 1 --zookeeper zookeeper:2181
+
+docker run --rm --network snowplow ches/kafka kafka-topics.sh --list --zookeeper zookeeper:2181
+
+#### Starting the Scala stream collector ####
+docker run -d --name collector --network snowplow --link kafka:kafka \
+  -v ${PWD}/config:/snowplow/config \
+  -p 9000:9000 \
+  -e 'SP_JAVA_OPTS=-Xms512m -Xmx512m' \
+  snowplow-docker-registry.bintray.io/snowplow/scala-stream-collector-kafka:0.14.0 \
+  --config /snowplow/config/collector_config.hocon
+
+
+#### Starting the Scala Enrich Kafka####
+docker run -d --name enrich --network snowplow --link kafka:kafka --link privateiglu:privateiglu \
+  -v ${PWD}/config:/snowplow/config \
+  -v ${PWD}/enrichments:/snowplow/enrichments \
+  -v ${PWD}/iglu_resolver.json:/snowplow/iglu_resolver.json \
+  -e 'SP_JAVA_OPTS=-Xms512m -Xmx512m' \
+  snowplow-docker-registry.bintray.io/snowplow/stream-enrich-kafka:0.19.1 \
+  --config /snowplow/config/enrich_config.hocon \
+  --resolver file:/snowplow/iglu_resolver.json \
+  --enrichments file:/snowplow/enrichments
+
+#### starting private igloo repo #####
+docker run -d --name privateiglu --network snowplow simple-http
+
+#### starting consumer ###
+docker run --d --name consumer --network snowplow --link kafka:kafka -v ${PWD}/analytics.pydb:/root/analytics.pydb mycon
